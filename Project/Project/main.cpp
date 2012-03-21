@@ -6,16 +6,17 @@
 using namespace std;
 
 char topColor;
-const int SLN_SIZE = 200;
+const int SOLUTION_SIZE = 200;
 int cscounter = 0;
 int xCoordinate, yCoordinate, solveCounter = 0, solutionIndex = 0, coorIndex = 0;
 bool problem = false, validation = false;
 int xCoor[9] = {25, 25, 25, 25, 25, 25, 25, 25, 25};
 int yCoor[9] = {25, 25, 25, 25, 25, 25, 25, 25, 25};
-string solution[SLN_SIZE], shortestSolution[SLN_SIZE], preoptimization[SLN_SIZE]; 
+string solution[SOLUTION_SIZE], shortestSolution[SOLUTION_SIZE], preoptimization[SOLUTION_SIZE]; 
 char sideOne[3], sideTwo[3], sideThree[3], sideFour[3];
 
-int lutM[12][4] = 
+//Coordinates of the middles on a 2D grid
+int lookUpTableMiddles[12][4] = 
 { 
 	0, 4, 3, 10,
 	1, 3, 3, 1,
@@ -31,7 +32,8 @@ int lutM[12][4] =
 	5, 10, 8, 4 
 };
 
-int lutC[8][6] = 
+//Coordinates of the corners on a 2D grid
+int lookUpTableCorners[8][6] = 
 {
 	0, 3, 3, 0, 3, 11,
 	0, 5, 3, 8, 3, 9,
@@ -72,246 +74,246 @@ char masterCube[9][12] =
 void rightClock()
 {
 	//------------Get sides------------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[i][5];
-	for(int i = 0; i < 3; i++)
-		sideTwo[i] = cube[i][5];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[i][9];
-	for(int i = 6; i < 9; i++)
-		sideFour[i - 6] = cube[i][5];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[index][5];
+	for(int index = 0; index < 3; index++)
+		sideTwo[index] = cube[index][5];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[index][9];
+	for(int index = 6; index < 9; index++)
+		sideFour[index - 6] = cube[index][5];
 	//----------Set Sides----------
-	for(int i = 0; i < 3; i++)
-		cube[3 + i][5] = sideFour[i];
-	for(int i = 0; i < 3; i++)
-		cube[i][5] = sideOne[i];
-	for(int i = 0; i < 3; i++)
-		cube[5 - i][9] = sideTwo[i];
-	for(int i = 0; i < 3; i++)
-		cube[8 - i][5] = sideThree[i];
+	for(int index = 0; index < 3; index++)
+		cube[3 + index][5] = sideFour[index];
+	for(int index = 0; index < 3; index++)
+		cube[index][5] = sideOne[index];
+	for(int index = 0; index < 3; index++)
+		cube[5 - index][9] = sideTwo[index];
+	for(int index = 0; index < 3; index++)
+		cube[8 - index][5] = sideThree[index];
 	//-------------Get Face-----------
-	for(int i = 6; i < 9; i++)
-		sideOne[i - 6] = cube[3][i];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[i][8];
-	for(int i = 6; i < 9; i++)
-		sideThree[i - 6] = cube[5][i];
-	for(int i = 3; i < 6; i++)
-		sideFour[i - 3] = cube[i][6];
+	for(int index = 6; index < 9; index++)
+		sideOne[index - 6] = cube[3][index];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[index][8];
+	for(int index = 6; index < 9; index++)
+		sideThree[index - 6] = cube[5][index];
+	for(int index = 3; index < 6; index++)
+		sideFour[index - 3] = cube[index][6];
 	//----------Set Faces--------
-	for(int i = 6; i < 9; i++)
-		cube[3][i] = sideFour[i - 6];
-	for(int i = 3; i < 6; i++)
-		cube[i][8] = sideOne[i - 3];
-	for(int i = 0; i < 3; i++)
-		cube[5][8 - i] = sideTwo[i];
-	for(int i = 3; i < 6; i++)
-		cube[i][6] = sideThree[i - 3];
+	for(int index = 6; index < 9; index++)
+		cube[3][index] = sideFour[index - 6];
+	for(int index = 3; index < 6; index++)
+		cube[index][8] = sideOne[index - 3];
+	for(int index = 0; index < 3; index++)
+		cube[5][8 - index] = sideTwo[index];
+	for(int index = 3; index < 6; index++)
+		cube[index][6] = sideThree[index - 3];
 }
 
 //Rotate left side clockwise
 void leftClock()
 {
 	//------------Get sides------------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[i][3];
-	for(int i = 0; i < 3; i++)
-		sideTwo[i] = cube[i][3];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[i][11];
-	for(int i = 6; i < 9; i++)
-		sideFour[i - 6] = cube[i][3];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[index][3];
+	for(int index = 0; index < 3; index++)
+		sideTwo[index] = cube[index][3];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[index][11];
+	for(int index = 6; index < 9; index++)
+		sideFour[index - 6] = cube[index][3];
 	//----------Set Sides----------
-	for(int i = 3; i < 6; i++)
-		cube[i][11] = sideFour[5 - i];
-	for(int i = 6; i < 9; i++)
-		cube[i][3] = sideOne[i - 6];
-	for(int i = 3; i < 6; i++)
-		cube[i][3] = sideTwo[i - 3];
-	for(int i = 0; i < 3; i++)
-		cube[i][3] = sideThree[2 - i];
+	for(int index = 3; index < 6; index++)
+		cube[index][11] = sideFour[5 - index];
+	for(int index = 6; index < 9; index++)
+		cube[index][3] = sideOne[index - 6];
+	for(int index = 3; index < 6; index++)
+		cube[index][3] = sideTwo[index - 3];
+	for(int index = 0; index < 3; index++)
+		cube[index][3] = sideThree[2 - index];
 	//-------------Get Face-----------
-	for(int i = 0; i < 3; i++)
-		sideOne[i] = cube[3][i];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[i][2];
-	for(int i = 0; i < 3; i++)
-		sideThree[i] = cube[5][i];
-	for(int i = 3; i < 6; i++)
-		sideFour[i - 3] = cube[i][0];
+	for(int index = 0; index < 3; index++)
+		sideOne[index] = cube[3][index];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[index][2];
+	for(int index = 0; index < 3; index++)
+		sideThree[index] = cube[5][index];
+	for(int index = 3; index < 6; index++)
+		sideFour[index - 3] = cube[index][0];
 	//----------Set Faces--------
-	for(int i = 0; i < 3; i++)
-		cube[3][2 - i] = sideFour[i];
-	for(int i = 3; i < 6; i++)
-		cube[i][2] = sideOne[i - 3];
-	for(int i = 0; i < 3; i++)
-		cube[5][2 - i] = sideTwo[i];
-	for(int i = 3; i < 6; i++)
-		cube[i][0] = sideThree[i - 3];
+	for(int index = 0; index < 3; index++)
+		cube[3][2 - index] = sideFour[index];
+	for(int index = 3; index < 6; index++)
+		cube[index][2] = sideOne[index - 3];
+	for(int index = 0; index < 3; index++)
+		cube[5][2 - index] = sideTwo[index];
+	for(int index = 3; index < 6; index++)
+		cube[index][0] = sideThree[index - 3];
 }
 
 //Rotate top face clockwise
 void upperClock()
 {
 	//------------Get sides------------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[i][6];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[6][i];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[i][2];
-	for(int i = 3; i < 6; i++)
-		sideFour[i - 3] = cube[2][i];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[index][6];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[6][index];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[index][2];
+	for(int index = 3; index < 6; index++)
+		sideFour[index - 3] = cube[2][index];
 	//----------Set Sides----------
-	for(int i = 3; i < 6; i++)
-		cube[i][6] = sideFour[i - 3];
-	for(int i = 0; i < 3; i++)
-		cube[6][5 - i] = sideOne[i];
-	for(int i = 3; i < 6; i++)
-		cube[i][2] = sideTwo[i - 3];
-	for(int i = 3; i < 6; i++)
-		cube[2][i] = sideThree[5 - i];
+	for(int index = 3; index < 6; index++)
+		cube[index][6] = sideFour[index - 3];
+	for(int index = 0; index < 3; index++)
+		cube[6][5 - index] = sideOne[index];
+	for(int index = 3; index < 6; index++)
+		cube[index][2] = sideTwo[index - 3];
+	for(int index = 3; index < 6; index++)
+		cube[2][index] = sideThree[5 - index];
 	//-------------Get Face-----------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[3][i];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[i][5];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[5][i];
-	for(int i = 3; i < 6; i++)
-		sideFour[i - 3] = cube[i][3];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[3][index];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[index][5];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[5][index];
+	for(int index = 3; index < 6; index++)
+		sideFour[index - 3] = cube[index][3];
 	//----------Set Faces--------
-	for(int i = 3; i < 6; i++)
-		cube[3][i] = sideFour[5 - i];
-	for(int i = 3; i < 6; i++)
-		cube[i][5] = sideOne[i - 3];
-	for(int i = 3; i < 6; i++)
-		cube[5][8 - i] = sideTwo[i - 3];
-	for(int i = 3; i < 6; i++)
-		cube[i][3] = sideThree[i - 3];
+	for(int index = 3; index < 6; index++)
+		cube[3][index] = sideFour[5 - index];
+	for(int index = 3; index < 6; index++)
+		cube[index][5] = sideOne[index - 3];
+	for(int index = 3; index < 6; index++)
+		cube[5][8 - index] = sideTwo[index - 3];
+	for(int index = 3; index < 6; index++)
+		cube[index][3] = sideThree[index - 3];
 }
 
 //Rotate front face clockwise
 void frontClock()
 {
 	//------------Get sides------------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[5][i];
-	for(int i = 6; i < 9; i++)
-		sideTwo[i - 6] = cube[5][i];
-	for(int i = 9; i < 12; i++)
-		sideThree[i - 9] = cube[5][i];
-	for(int i = 0; i < 3; i++)
-		sideFour[i] = cube[5][i];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[5][index];
+	for(int index = 6; index < 9; index++)
+		sideTwo[index - 6] = cube[5][index];
+	for(int index = 9; index < 12; index++)
+		sideThree[index - 9] = cube[5][index];
+	for(int index = 0; index < 3; index++)
+		sideFour[index] = cube[5][index];
 	//----------Set Sides----------
-	for(int i = 3; i < 6; i++)
-		cube[5][i] = sideFour[i - 3];
-	for(int i = 6; i < 9; i++)
-		cube[5][i] = sideOne[i - 6];
-	for(int i = 9; i < 12; i++)
-		cube[5][i] = sideTwo[i - 9];
-	for(int i = 0; i < 3; i++)
-		cube[5][i] = sideThree[i];
+	for(int index = 3; index < 6; index++)
+		cube[5][index] = sideFour[index - 3];
+	for(int index = 6; index < 9; index++)
+		cube[5][index] = sideOne[index - 6];
+	for(int index = 9; index < 12; index++)
+		cube[5][index] = sideTwo[index - 9];
+	for(int index = 0; index < 3; index++)
+		cube[5][index] = sideThree[index];
 	//-------------Get Face-----------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[6][i];
-	for(int i = 6; i < 9; i++)
-		sideTwo[i - 6] = cube[i][5];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[8][i];
-	for(int i = 6; i < 9; i++)
-		sideFour[i - 6] = cube[i][3];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[6][index];
+	for(int index = 6; index < 9; index++)
+		sideTwo[index - 6] = cube[index][5];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[8][index];
+	for(int index = 6; index < 9; index++)
+		sideFour[index - 6] = cube[index][3];
 	//----------Set Faces--------
-	for(int i = 3; i < 6; i++)
-		cube[6][i] = sideFour[5 - i];
-	for(int i = 6; i < 9; i++)
-		cube[i][5] = sideOne[i - 6];
-	for(int i = 3; i < 6; i++)
-		cube[8][8 - i] = sideTwo[i - 3];
-	for(int i = 6; i < 9; i++)
-		cube[i][3] = sideThree[i - 6];
+	for(int index = 3; index < 6; index++)
+		cube[6][index] = sideFour[5 - index];
+	for(int index = 6; index < 9; index++)
+		cube[index][5] = sideOne[index - 6];
+	for(int index = 3; index < 6; index++)
+		cube[8][8 - index] = sideTwo[index - 3];
+	for(int index = 6; index < 9; index++)
+		cube[index][3] = sideThree[index - 6];
 }
 
 //Rotate the back face clockwise
 void backClock()
 {
 	//------------Get sides------------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[3][i];
-	for(int i = 6; i < 9; i++)
-		sideTwo[i - 6] = cube[3][i];
-	for(int i = 9; i < 12; i++)
-		sideThree[i - 9] = cube[3][i];
-	for(int i = 0; i < 3; i++)
-		sideFour[i] = cube[3][i];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[3][index];
+	for(int index = 6; index < 9; index++)
+		sideTwo[index - 6] = cube[3][index];
+	for(int index = 9; index < 12; index++)
+		sideThree[index - 9] = cube[3][index];
+	for(int index = 0; index < 3; index++)
+		sideFour[index] = cube[3][index];
 	//----------Set Sides----------
-	for(int i = 9; i < 12; i++)
-		cube[3][i] = sideFour[i - 9];
-	for(int i = 0; i < 3; i++)
-		cube[3][i] = sideOne[i];
-	for(int i = 3; i < 6; i++)
-		cube[3][i] = sideTwo[i - 3];
-	for(int i = 6; i < 9; i++)
-		cube[3][i] = sideThree[i - 6];
+	for(int index = 9; index < 12; index++)
+		cube[3][index] = sideFour[index - 9];
+	for(int index = 0; index < 3; index++)
+		cube[3][index] = sideOne[index];
+	for(int index = 3; index < 6; index++)
+		cube[3][index] = sideTwo[index - 3];
+	for(int index = 6; index < 9; index++)
+		cube[3][index] = sideThree[index - 6];
 	//-------------Get Face-----------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[0][i];
-	for(int i = 0; i < 3; i++)
-		sideTwo[i] = cube[i][5];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[2][i];
-	for(int i = 0; i < 3; i++)
-		sideFour[i] = cube[i][3];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[0][index];
+	for(int index = 0; index < 3; index++)
+		sideTwo[index] = cube[index][5];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[2][index];
+	for(int index = 0; index < 3; index++)
+		sideFour[index] = cube[index][3];
 	//----------Set Faces--------
-	for(int i = 3; i < 6; i++)
-		cube[0][i] = sideFour[5 - i];
-	for(int i = 0; i < 3; i++)
-		cube[i][5] = sideOne[i];
-	for(int i = 3; i < 6; i++)
-		cube[2][8 - i] = sideTwo[i - 3];
-	for(int i = 0; i < 3; i++)
-		cube[i][3] = sideThree[i];
+	for(int index = 3; index < 6; index++)
+		cube[0][index] = sideFour[5 - index];
+	for(int index = 0; index < 3; index++)
+		cube[index][5] = sideOne[index];
+	for(int index = 3; index < 6; index++)
+		cube[2][8 - index] = sideTwo[index - 3];
+	for(int index = 0; index < 3; index++)
+		cube[index][3] = sideThree[index];
 }
 
 //Rotate the bottom face clockwise
 void downClock()
 {
 	//-------------Get Face-----------
-	for(int i = 9; i < 12; i++)
-		sideOne[i - 9] = cube[3][i];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[i][11];
-	for(int i = 11; i >= 9; i--)
-		sideThree[11 - i] = cube[5][i];
-	for(int i = 5; i >= 3; i--)
-		sideFour[5 - i] = cube[i][9];
+	for(int index = 9; index < 12; index++)
+		sideOne[index - 9] = cube[3][index];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[index][11];
+	for(int index = 11; index >= 9; index--)
+		sideThree[11 - index] = cube[5][index];
+	for(int index = 5; index >= 3; index--)
+		sideFour[5 - index] = cube[index][9];
 	//----------Set Faces--------
-	for(int i = 9; i < 12; i++)
-		cube[3][i] = sideFour[i - 9];
-	for(int i = 3; i < 6; i++)
-		cube[i][11] = sideOne[i - 3];
-	for(int i = 9; i < 12; i++)
-		cube[5][i] = sideTwo[11 - i];
-	for(int i = 3; i < 6; i++)
-		cube[i][9] = sideThree[5 - i];
+	for(int index = 9; index < 12; index++)
+		cube[3][index] = sideFour[index - 9];
+	for(int index = 3; index < 6; index++)
+		cube[index][11] = sideOne[index - 3];
+	for(int index = 9; index < 12; index++)
+		cube[5][index] = sideTwo[11 - index];
+	for(int index = 3; index < 6; index++)
+		cube[index][9] = sideThree[5 - index];
 	//------------Get sides------------
-	for(int i = 3; i < 6; i++)
-		sideOne[i - 3] = cube[0][i];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[i][8];
-	for(int i = 3; i < 6; i++)
-		sideThree[i - 3] = cube[8][i];
-	for(int i = 3; i < 6; i++)
-		sideFour[i - 3] = cube[i][0];
+	for(int index = 3; index < 6; index++)
+		sideOne[index - 3] = cube[0][index];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[index][8];
+	for(int index = 3; index < 6; index++)
+		sideThree[index - 3] = cube[8][index];
+	for(int index = 3; index < 6; index++)
+		sideFour[index - 3] = cube[index][0];
 	//----------Set Sides----------
-	for(int i = 3; i < 6; i++)
-		cube[0][i] = sideTwo[i - 3];
-	for(int i = 3; i < 6; i++)
-		cube[i][8] = sideThree[5 - i];
-	for(int i = 3; i < 6; i++)
-		cube[8][i] = sideFour[i - 3];
-	for(int i = 3; i < 6; i++)
-		cube[i][0] = sideOne[5 - i];
+	for(int index = 3; index < 6; index++)
+		cube[0][index] = sideTwo[index - 3];
+	for(int index = 3; index < 6; index++)
+		cube[index][8] = sideThree[5 - index];
+	for(int index = 3; index < 6; index++)
+		cube[8][index] = sideFour[index - 3];
+	for(int index = 3; index < 6; index++)
+		cube[index][0] = sideOne[5 - index];
 }
 
 //Rotating all faces counter clockwise is simply to rotate clockwise 3 times
@@ -358,23 +360,23 @@ void turnCubeRight()
 	frontCounter();
 	backClock();
 	//------------Get sides------------
-	for(int i = 0; i < 3; i++)
-		sideOne[i] = cube[4][i];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[4][i];
-	for(int i = 6; i < 9; i++)
-		sideThree[i - 6] = cube[4][i];
-	for(int i = 9; i < 12; i++)
-		sideFour[i - 9] = cube[4][i];
+	for(int index = 0; index < 3; index++)
+		sideOne[index] = cube[4][index];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[4][index];
+	for(int index = 6; index < 9; index++)
+		sideThree[index - 6] = cube[4][index];
+	for(int index = 9; index < 12; index++)
+		sideFour[index - 9] = cube[4][index];
 	//----------Set Sides----------
-	for(int i = 0; i < 3; i++)
-		cube[4][i] = sideFour[i];
-	for(int i = 3; i < 6; i++)
-		cube[4][i] = sideOne[i - 3];
-	for(int i = 6; i < 9; i++)
-		cube[4][i] = sideTwo[i - 6];
-	for(int i = 9; i < 12; i++)
-		cube[4][i] = sideThree[i - 9];
+	for(int index = 0; index < 3; index++)
+		cube[4][index] = sideFour[index];
+	for(int index = 3; index < 6; index++)
+		cube[4][index] = sideOne[index - 3];
+	for(int index = 6; index < 9; index++)
+		cube[4][index] = sideTwo[index - 6];
+	for(int index = 9; index < 12; index++)
+		cube[4][index] = sideThree[index - 9];
 }
 
 //turns the entire cube to the front
@@ -383,30 +385,30 @@ void turnCubeFront()
 	leftClock();
 	rightCounter();
 	//------------Get sides------------
-	for(int i = 0; i < 3; i++)
-		sideOne[i] = cube[i][4];
-	for(int i = 3; i < 6; i++)
-		sideTwo[i - 3] = cube[i][4];
-	for(int i = 6; i < 9; i++)
-		sideThree[i - 6] = cube[i][4];
-	for(int i = 3; i < 6; i++)
-		sideFour[i - 3] = cube[i][10];
+	for(int index = 0; index < 3; index++)
+		sideOne[index] = cube[index][4];
+	for(int index = 3; index < 6; index++)
+		sideTwo[index - 3] = cube[index][4];
+	for(int index = 6; index < 9; index++)
+		sideThree[index - 6] = cube[index][4];
+	for(int index = 3; index < 6; index++)
+		sideFour[index - 3] = cube[index][10];
 	//----------Set Sides----------
-	for(int i = 0; i < 3; i++)
-		cube[i][4] = sideFour[2 - i];
-	for(int i = 3; i < 6; i++)
-		cube[i][4] = sideOne[i - 3];
-	for(int i = 6; i < 9; i++)
-		cube[i][4] = sideTwo[i - 6];
-	for(int i = 3; i < 6; i++)
-		cube[i][10] = sideThree[5 - i];
+	for(int index = 0; index < 3; index++)
+		cube[index][4] = sideFour[2 - index];
+	for(int index = 3; index < 6; index++)
+		cube[index][4] = sideOne[index - 3];
+	for(int index = 6; index < 9; index++)
+		cube[index][4] = sideTwo[index - 6];
+	for(int index = 3; index < 6; index++)
+		cube[index][10] = sideThree[5 - index];
 }
 
 //Do 200 random moves
 void random()
 {
 	srand((unsigned short)time(0));
-	for(int i = 0; i < 200; i++)
+	for(int index = 0; index < 200; index++)
 	{
 		switch(rand()%12)
 		{
@@ -475,11 +477,11 @@ void printCube()
 	cout << "      Rubik's Cube" << endl;
 
 	string cubeCurrent = "x";
-	for (int i = 0; i < 9; i++)
+	for (int row = 0; row < 9; row++)
 	{
-		for(int j = 0; j < 12; j++)
+		for(int column = 0; column < 12; column++)
 		{
-			cubeCurrent = cube[i][j];
+			cubeCurrent = cube[row][column];
 			determineColor(cubeCurrent);
 			cout << cubeCurrent << " ";
 		}
@@ -489,14 +491,63 @@ void printCube()
 	colorOfText(LIGHT_GREY);
 }
 
+void findAndEliminateCornerCoordinates(int index)
+{
+	if( (yCoor[index] == 0 && xCoor[index] == 3) ||	(yCoor[index] == 0 && xCoor[index] == 5) ||
+		(yCoor[index] == 2 && xCoor[index] == 3) ||	(yCoor[index] == 2 && xCoor[index] == 5) ||
+		(yCoor[index] == 3 && xCoor[index] == 0) ||	(yCoor[index] == 3 && xCoor[index] == 2) ||
+		(yCoor[index] == 3 && xCoor[index] == 3) ||	(yCoor[index] == 3 && xCoor[index] == 5) ||
+		(yCoor[index] == 3 && xCoor[index] == 6) ||	(yCoor[index] == 3 && xCoor[index] == 8) ||
+		(yCoor[index] == 3 && xCoor[index] == 9) ||	(yCoor[index] == 3 && xCoor[index] == 11) || 
+		(yCoor[index] == 5 && xCoor[index] == 0) ||	(yCoor[index] == 5 && xCoor[index] == 2) ||
+		(yCoor[index] == 5 && xCoor[index] == 3) ||	(yCoor[index] == 5 && xCoor[index] == 5) ||
+		(yCoor[index] == 5 && xCoor[index] == 6) ||	(yCoor[index] == 5 && xCoor[index] == 8) ||
+		(yCoor[index] == 5 && xCoor[index] == 9) ||	(yCoor[index] == 5 && xCoor[index] == 11) ||
+		(yCoor[index] == 6 && xCoor[index] == 3) ||	(yCoor[index] == 6 && xCoor[index] == 5) ||
+		(yCoor[index] == 8 && xCoor[index] == 3) ||	(yCoor[index] == 8 && xCoor[index] == 5) ||
+		(yCoor[index] == 1 && xCoor[index] == 4) ||	(yCoor[index] == 4 && xCoor[index] == 1) ||
+		(yCoor[index] == 4 && xCoor[index] == 4) ||	(yCoor[index] == 4 && xCoor[index] == 7) ||
+		(yCoor[index] == 4 && xCoor[index] == 10) ||(yCoor[index] == 7 && xCoor[index] == 4) )
+	{
+		xCoor[index] = 15;
+		yCoor[index] = 15;
+	}
+}
+
+void findAndEliminateMiddleCoordinates(int index)
+{
+	if( (yCoor[index] == 0 && xCoor[index] == 4) ||	(yCoor[index] == 1 && xCoor[index] == 3) ||
+		(yCoor[index] == 1 && xCoor[index] == 5) ||	(yCoor[index] == 2 && xCoor[index] == 4) ||
+		(yCoor[index] == 3 && xCoor[index] == 1) ||	(yCoor[index] == 3 && xCoor[index] == 4) ||
+		(yCoor[index] == 3 && xCoor[index] == 7) ||	(yCoor[index] == 3 && xCoor[index] == 10) ||
+		(yCoor[index] == 4 && xCoor[index] == 0) ||	(yCoor[index] == 4 && xCoor[index] == 2) ||
+		(yCoor[index] == 4 && xCoor[index] == 3) ||	(yCoor[index] == 4 && xCoor[index] == 5) ||
+		(yCoor[index] == 4 && xCoor[index] == 6) ||	(yCoor[index] == 4 && xCoor[index] == 8) ||
+		(yCoor[index] == 4 && xCoor[index] == 9) ||	(yCoor[index] == 4 && xCoor[index] == 11) ||
+		(yCoor[index] == 5 && xCoor[index] == 1) ||	(yCoor[index] == 5 && xCoor[index] == 4) ||
+		(yCoor[index] == 5 && xCoor[index] == 7) ||	(yCoor[index] == 5 && xCoor[index] == 10) ||
+		(yCoor[index] == 6 && xCoor[index] == 4) ||	(yCoor[index] == 7 && xCoor[index] == 3) ||
+		(yCoor[index] == 7 && xCoor[index] == 5) ||	(yCoor[index] == 8 && xCoor[index] == 4) ||
+		(yCoor[index] == 1 && xCoor[index] == 4) ||	(yCoor[index] == 4 && xCoor[index] == 1) ||
+		(yCoor[index] == 4 && xCoor[index] == 4) ||	(yCoor[index] == 4 && xCoor[index] == 7) ||
+		(yCoor[index] == 4 && xCoor[index] == 10) ||(yCoor[index] == 7 && xCoor[index] == 4) )
+	{
+		xCoor[index] = 15;
+		yCoor[index] = 15;
+	}
+}
+
 //This function will find the coordinates of a cell that is specified by the parameters
 void findCells(char color, string whatLookingFor)
 {
+	//Set the coordinates of each cell at 20,20, which is a bad state if left.
 	for(coorIndex = 0; coorIndex < 9; coorIndex++)
 	{
 		xCoor[coorIndex] = 20;
 		yCoor[coorIndex] = 20;
 	}
+
+	//Find the coordinates of all 9 colors on the cube
 	coorIndex = 0;
 	for(int row = 0; row < 9; row++)
 	{
@@ -512,52 +563,16 @@ void findCells(char color, string whatLookingFor)
 	}
 	if(whatLookingFor.compare("middle") == 0)
 	{
-		for(int i = 0; i < 9; i++)
+		for(int index = 0; index < 9; index++)
 		{
-			if( (yCoor[i] == 0 && xCoor[i] == 3) ||	(yCoor[i] == 0 && xCoor[i] == 5) ||
-				(yCoor[i] == 2 && xCoor[i] == 3) ||	(yCoor[i] == 2 && xCoor[i] == 5) ||
-				(yCoor[i] == 3 && xCoor[i] == 0) ||	(yCoor[i] == 3 && xCoor[i] == 2) ||
-				(yCoor[i] == 3 && xCoor[i] == 3) ||	(yCoor[i] == 3 && xCoor[i] == 5) ||
-				(yCoor[i] == 3 && xCoor[i] == 6) ||	(yCoor[i] == 3 && xCoor[i] == 8) ||
-				(yCoor[i] == 3 && xCoor[i] == 9) ||	(yCoor[i] == 3 && xCoor[i] == 11) || 
-				(yCoor[i] == 5 && xCoor[i] == 0) ||	(yCoor[i] == 5 && xCoor[i] == 2) ||
-				(yCoor[i] == 5 && xCoor[i] == 3) ||	(yCoor[i] == 5 && xCoor[i] == 5) ||
-				(yCoor[i] == 5 && xCoor[i] == 6) ||	(yCoor[i] == 5 && xCoor[i] == 8) ||
-				(yCoor[i] == 5 && xCoor[i] == 9) ||	(yCoor[i] == 5 && xCoor[i] == 11) ||
-				(yCoor[i] == 6 && xCoor[i] == 3) ||	(yCoor[i] == 6 && xCoor[i] == 5) ||
-				(yCoor[i] == 8 && xCoor[i] == 3) ||	(yCoor[i] == 8 && xCoor[i] == 5) ||
-				(yCoor[i] == 1 && xCoor[i] == 4) ||	(yCoor[i] == 4 && xCoor[i] == 1) ||
-				(yCoor[i] == 4 && xCoor[i] == 4) ||	(yCoor[i] == 4 && xCoor[i] == 7) ||
-				(yCoor[i] == 4 && xCoor[i] == 10) ||(yCoor[i] == 7 && xCoor[i] == 4) )
-			{
-				xCoor[i] = 15;
-				yCoor[i] = 15;
-			}
+			findAndEliminateCornerCoordinates(index);
 		}	
 	}
 	if(whatLookingFor.compare("corner") == 0)
 	{
-		for(int i = 0; i < 9; i++)
+		for(int index = 0; index < 9; index++)
 		{
-			if( (yCoor[i] == 0 && xCoor[i] == 4) ||	(yCoor[i] == 1 && xCoor[i] == 3) ||
-				(yCoor[i] == 1 && xCoor[i] == 5) ||	(yCoor[i] == 2 && xCoor[i] == 4) ||
-				(yCoor[i] == 3 && xCoor[i] == 1) ||	(yCoor[i] == 3 && xCoor[i] == 4) ||
-				(yCoor[i] == 3 && xCoor[i] == 7) ||	(yCoor[i] == 3 && xCoor[i] == 10) ||
-				(yCoor[i] == 4 && xCoor[i] == 0) ||	(yCoor[i] == 4 && xCoor[i] == 2) ||
-				(yCoor[i] == 4 && xCoor[i] == 3) ||	(yCoor[i] == 4 && xCoor[i] == 5) ||
-				(yCoor[i] == 4 && xCoor[i] == 6) ||	(yCoor[i] == 4 && xCoor[i] == 8) ||
-				(yCoor[i] == 4 && xCoor[i] == 9) ||	(yCoor[i] == 4 && xCoor[i] == 11) ||
-				(yCoor[i] == 5 && xCoor[i] == 1) ||	(yCoor[i] == 5 && xCoor[i] == 4) ||
-				(yCoor[i] == 5 && xCoor[i] == 7) ||	(yCoor[i] == 5 && xCoor[i] == 10) ||
-				(yCoor[i] == 6 && xCoor[i] == 4) ||	(yCoor[i] == 7 && xCoor[i] == 3) ||
-				(yCoor[i] == 7 && xCoor[i] == 5) ||	(yCoor[i] == 8 && xCoor[i] == 4) ||
-				(yCoor[i] == 1 && xCoor[i] == 4) ||	(yCoor[i] == 4 && xCoor[i] == 1) ||
-				(yCoor[i] == 4 && xCoor[i] == 4) ||	(yCoor[i] == 4 && xCoor[i] == 7) ||
-				(yCoor[i] == 4 && xCoor[i] == 10) ||(yCoor[i] == 7 && xCoor[i] == 4) )
-			{
-				xCoor[i] = 15;
-				yCoor[i] = 15;
-			}
+			findAndEliminateMiddleCoordinates(index);
 		}	
 	}
 }
@@ -596,14 +611,17 @@ void flipCube(int toBeUpFace)
 void rotateFaces(string faces)
 {
 	char faceturn;
-	for (int i = 0; i < (int)faces.length(); i++)
+	for (int index = 0; index < (int)faces.length(); index++)
 	{
-		faceturn=faces[i];
-		if(solutionIndex < SLN_SIZE && validation != true)
+		faceturn=faces[index];
+		//If the program is not valid or has not gone above solution size, then add it to the end of the solution.
+		if(solutionIndex < SOLUTION_SIZE && validation != true)
 		{
 			solution[solutionIndex] = faceturn;
 			solutionIndex++;
 		}
+
+		//do the appropriate action to the cube
 		switch (faceturn)
 		{
 		case 'U': upperClock();    break;
@@ -631,6 +649,7 @@ void rotateFaces(string faces)
 }
 
 //Function to check over all of the cube for all colors
+//This function allows a user to enter 1-3 layers to check over for correctness.
 bool checkCube(int layers)
 {
 	bool topFace = false;
@@ -639,75 +658,76 @@ bool checkCube(int layers)
 	bool side3 = false;
 	bool side4 = false;
 	bool bottomFace = false;
-	char colorMeThis = cube[4][4];
-	if (cube[3][3] == colorMeThis && cube[3][4] == colorMeThis && cube[3][5] == colorMeThis && cube[4][3] == colorMeThis &&
-		cube[4][5] == colorMeThis && cube[5][3] == colorMeThis && cube[5][4] == colorMeThis && cube[5][5] == colorMeThis)
+	char faceColor = cube[4][4];
+	if (cube[3][3] == faceColor && cube[3][4] == faceColor && cube[3][5] == faceColor && cube[4][3] == faceColor &&
+		cube[4][5] == faceColor && cube[5][3] == faceColor && cube[5][4] == faceColor && cube[5][5] == faceColor)
 		topFace = true;
 
-	colorMeThis = cube[1][4]; //-Top------------Change Sides-------------- 
-	if (cube[2][3] == colorMeThis && cube[2][4] == colorMeThis && cube[2][5] == colorMeThis && layers >= 1)
+	faceColor = cube[1][4]; //-Top------------Change Sides-------------- 
+	if (cube[2][3] == faceColor && cube[2][4] == faceColor && cube[2][5] == faceColor && layers >= 1)
 		side1 = true;
 	else if(layers >= 1)
 		side1 = false;
-	if (cube[1][3] == colorMeThis && cube[1][5] == colorMeThis && layers >= 2 && side1 == true)
+	if (cube[1][3] == faceColor && cube[1][5] == faceColor && layers >= 2 && side1 == true)
 		side1 = true;
 	else if(layers >= 2)
 		side1 = false;
-	if (cube[0][4] == colorMeThis && cube[0][3] == colorMeThis && cube[0][5] == colorMeThis && layers >= 3 && side1 == true)
+	if (cube[0][4] == faceColor && cube[0][3] == faceColor && cube[0][5] == faceColor && layers >= 3 && side1 == true)
 		side1 = true;
 	else if(layers >= 3)
 		side1 = false;
 
-	colorMeThis = cube[4][1]; //-Left-----------Change Sides--------------
-	if (cube[3][2] == colorMeThis && cube[4][2] == colorMeThis && cube[5][2] == colorMeThis && layers >= 1)
+	faceColor = cube[4][1]; //-Left-----------Change Sides--------------
+	if (cube[3][2] == faceColor && cube[4][2] == faceColor && cube[5][2] == faceColor && layers >= 1)
 		side2 = true;
 	else if(layers >= 1)
 		side1 = false;
-	if (cube[3][1] == colorMeThis && cube[5][1] == colorMeThis && layers >= 2 && side2 == true)
+	if (cube[3][1] == faceColor && cube[5][1] == faceColor && layers >= 2 && side2 == true)
 		side2 = true;
 	else if (layers >= 2)
 		side2 = false;
-	if (cube[4][0] == colorMeThis && cube[3][0] == colorMeThis && cube[5][0] == colorMeThis && layers >= 3 && side2 == true)
+	if (cube[4][0] == faceColor && cube[3][0] == faceColor && cube[5][0] == faceColor && layers >= 3 && side2 == true)
 		side2 = true;
 	else if(layers >= 3)
 		side2 = false;
 
-	colorMeThis = cube[7][4]; //-Bottom---------Change Sides--------------
-	if (cube[6][3] == colorMeThis && cube[6][4] == colorMeThis && cube[6][5] == colorMeThis && layers >= 1)
+	faceColor = cube[7][4]; //-Bottom---------Change Sides--------------
+	if (cube[6][3] == faceColor && cube[6][4] == faceColor && cube[6][5] == faceColor && layers >= 1)
 		side3 = true;
 	else if(layers >= 1)
 		side1 = false;
-	if(cube[7][3] == colorMeThis && cube[7][5] == colorMeThis && layers >= 2 && side3 == true)
+	if(cube[7][3] == faceColor && cube[7][5] == faceColor && layers >= 2 && side3 == true)
 		side3 = true;
 	else if (layers >= 2)
 		side3 = false;
-	if(cube[8][4] == colorMeThis && cube[8][3] == colorMeThis && cube[8][5] == colorMeThis && layers >= 3 && side3 == true)
+	if(cube[8][4] == faceColor && cube[8][3] == faceColor && cube[8][5] == faceColor && layers >= 3 && side3 == true)
 		side3 = true;
 	else if(layers >= 3)
 		side3 = false;
 
-	colorMeThis = cube[4][7]; //-Right----------Change Sides--------------
-	if (cube[3][6] == colorMeThis && cube[4][6] == colorMeThis && cube[5][6] == colorMeThis && layers >= 1)
+	faceColor = cube[4][7]; //-Right----------Change Sides--------------
+	if (cube[3][6] == faceColor && cube[4][6] == faceColor && cube[5][6] == faceColor && layers >= 1)
 		side4 = true;
 	else if(layers >= 1)
 		side1 = false;
-	if (cube[3][7] == colorMeThis && cube[5][7] == colorMeThis && layers >= 2 && side4 == true)
+	if (cube[3][7] == faceColor && cube[5][7] == faceColor && layers >= 2 && side4 == true)
 		side4 = true;
 	else if (layers >= 2)
 		side4 = false;
-	if (cube[4][8] == colorMeThis && cube[3][8] == colorMeThis && cube[5][8] == colorMeThis && layers >= 3 && side4 == true)
+	if (cube[4][8] == faceColor && cube[3][8] == faceColor && cube[5][8] == faceColor && layers >= 3 && side4 == true)
 		side4 = true;
 	else if(layers >= 3)
 		side4 = false;
 
-	colorMeThis = cube[4][10]; //----------------Change Sides--------------
-	if (cube[3][9] == colorMeThis && cube[3][10] == colorMeThis && cube[3][11] == colorMeThis && 
-		cube[4][9] == colorMeThis && cube[4][10] == colorMeThis && cube[4][11] == colorMeThis && 
-		cube[5][9] == colorMeThis && cube[5][10] == colorMeThis && cube[5][11] == colorMeThis && layers >= 3)
+	faceColor = cube[4][10]; //----------------Change Sides--------------
+	if (layers >= 3 &&		 //Only check the 3rd layer if it is actually specified to check
+		cube[3][9] == faceColor && cube[3][10] == faceColor && cube[3][11] == faceColor && 
+		cube[4][9] == faceColor && cube[4][10] == faceColor && cube[4][11] == faceColor && 
+		cube[5][9] == faceColor && cube[5][10] == faceColor && cube[5][11] == faceColor)
 		bottomFace = true;
-	else if (layers >= 3)
+	else if (layers >= 3) //Looking at the 3rd layer, but the face colors are not correct
 		bottomFace = false;
-	else if (layers <= 2) //can't look at 3rd layer on first 2 layers of solving
+	else if (layers <= 2) //Default state if checking 1 or 2 layers
 		bottomFace = true;
 
 	if(topFace == true && side1 == true && side2 == true && side3 == true && side4 == true && bottomFace == true)
@@ -720,10 +740,10 @@ bool checkCube(int layers)
 void solveTopMiddle()
 {
 	solveCounter = 0;
-	char topOrientation[4] = {'h', 'h', 'h', 'h'};
-	char correspMiddles[4] = {'h', 'h', 'h', 'h'};
-	char thisXCoor[4] = {'h', 'h', 'h', 'h'};
-	char thisYCoor[4] = {'h', 'h', 'h', 'h'};
+	char topOrientation[4] = {'h', 'h', 'h', 'h'}; //What middles should be on what side from the top layer
+	char correspMiddles[4] = {'h', 'h', 'h', 'h'}; //What middles actually are on the top layer
+	char thisXCoor[4] = {'h', 'h', 'h', 'h'}; //X-Coordinates of the 4 needed pieces
+	char thisYCoor[4] = {'h', 'h', 'h', 'h'}; //Y-coordinates of the 4 needed pieces
 	int focus = 0;
 	int middlesCounter = 0;
 	bool skip = false;
@@ -746,27 +766,27 @@ void solveTopMiddle()
 			{
 				thisXCoor[middlesCounter] = xCoor[counter];
 				thisYCoor[middlesCounter] = yCoor[counter];
-				for(int i = 0; i < 12; i++)
+				for(int index = 0; index < 12; index++)
 				{
-					if(yCoor[counter] == lutM[i][0] && xCoor[counter] == lutM[i][1])
+					if(yCoor[counter] == lookUpTableMiddles[index][0] && xCoor[counter] == lookUpTableMiddles[index][1])
 					{
-						correspMiddles[middlesCounter] = cube[ lutM[i][2] ][ lutM[i][3] ];
+						correspMiddles[middlesCounter] = cube[ lookUpTableMiddles[index][2] ][ lookUpTableMiddles[index][3] ];
 						middlesCounter++;
-						i = 12;
+						index = 12;
 					}
-					else if(yCoor[counter] == lutM[i][2] && xCoor[counter] == lutM[i][3])
+					else if(yCoor[counter] == lookUpTableMiddles[index][2] && xCoor[counter] == lookUpTableMiddles[index][3])
 					{
-						correspMiddles[middlesCounter] = cube[ lutM[i][0] ][ lutM[i][1] ];
+						correspMiddles[middlesCounter] = cube[ lookUpTableMiddles[index][0] ][ lookUpTableMiddles[index][1] ];
 						middlesCounter++;
-						i = 12;
+						index = 12;
 					}
 				} //end for
 			} //end if xCoor != 15
 		}//end for
-		for(int i = 0; i < 4; i++)
+		for(int index = 0; index < 4; index++)
 		{
-			if(correspMiddles[i] == topOrientation[solveCounter])
-				focus = i;
+			if(correspMiddles[index] == topOrientation[solveCounter])
+				focus = index;
 		}
 		switch(thisYCoor[focus])
 		{
@@ -909,28 +929,28 @@ void solveTopCorner()
 			{
 				thisXCoor[colorCounter] = xCoor[counter];
 				thisYCoor[colorCounter] = yCoor[counter];
-				for(int i = 0; i < 8; i++)
+				for(int index = 0; index < 8; index++)
 				{
-					if(lutC[i][0] == yCoor[counter] && lutC[i][1] == xCoor[counter])
+					if(lookUpTableCorners[index][0] == yCoor[counter] && lookUpTableCorners[index][1] == xCoor[counter])
 					{
-						oneColor[colorCounter] = cube[lutC[i][2]][lutC[i][3]];
-						twoColor[colorCounter] = cube[lutC[i][4]][lutC[i][5]];
+						oneColor[colorCounter] = cube[lookUpTableCorners[index][2]][lookUpTableCorners[index][3]];
+						twoColor[colorCounter] = cube[lookUpTableCorners[index][4]][lookUpTableCorners[index][5]];
 						colorCounter++;
-						i = 15;
+						index = 15;
 					}
-					else if(lutC[i][2] == yCoor[counter] && lutC[i][3] == xCoor[counter])
+					else if(lookUpTableCorners[index][2] == yCoor[counter] && lookUpTableCorners[index][3] == xCoor[counter])
 					{
-						oneColor[colorCounter] = cube[lutC[i][0]][lutC[i][1]];
-						twoColor[colorCounter] = cube[lutC[i][4]][lutC[i][5]];
+						oneColor[colorCounter] = cube[lookUpTableCorners[index][0]][lookUpTableCorners[index][1]];
+						twoColor[colorCounter] = cube[lookUpTableCorners[index][4]][lookUpTableCorners[index][5]];
 						colorCounter++;
-						i = 15;
+						index = 15;
 					}
-					else if(lutC[i][4] == yCoor[counter] && lutC[i][5] == xCoor[counter])
+					else if(lookUpTableCorners[index][4] == yCoor[counter] && lookUpTableCorners[index][5] == xCoor[counter])
 					{
-						oneColor[colorCounter] = cube[lutC[i][0]][lutC[i][1]];
-						twoColor[colorCounter] = cube[lutC[i][2]][lutC[i][3]];
+						oneColor[colorCounter] = cube[lookUpTableCorners[index][0]][lookUpTableCorners[index][1]];
+						twoColor[colorCounter] = cube[lookUpTableCorners[index][2]][lookUpTableCorners[index][3]];
 						colorCounter++;
-						i = 15;
+						index = 15;
 					}
 				} //end for(i(8))
 			}// end if xCoor != 15
@@ -1053,45 +1073,45 @@ void solveTopCorner()
 	}
 }
 
-//Function to solve the middle layer. This function assumes that the top layer is solved correctly.
+//Function to solve the middle layer. This function assumes that the top layer is solved correctopLefty.
 void solveMiddleLayer()
 {
 	solveCounter = 0;
 	int rotateCounter = 0;
 	string left = "k";
 	string right = "h";
-	bool tl = false;
-	bool tr = false;
-	bool br = false;
-	bool bl = false;
-	bool tlLoop = false;
+	bool topLeft = false;
+	bool topRight = false;
+	bool bottomRight = false;
+	bool bottomLeft = false;
+	bool topLeftLoop = false;
 	bool trLoop = false;
 	bool brLoop = false;
 	bool blLoop = false;
 	if(cube[4][1] == cube[3][1] && cube[1][4] == cube[1][3]) //top left middle
 	{
 		solveCounter++;
-		tl = true;
+		topLeft = true;
 	}
 	if(cube[4][7] == cube[3][7] && cube[1][4] == cube[1][5]) //top right middle
 	{
 		solveCounter++;
-		tr = true;
+		topRight = true;
 	}
 	if(cube[4][7] == cube[5][7] && cube[7][4] == cube[7][5]) //bottom right middle
 	{
 		solveCounter++;
-		br = true;
+		bottomRight = true;
 	}
 	if(cube[4][1] == cube[5][1] && cube[7][4] == cube[7][3]) //bottom left middle
 	{
 		solveCounter++;
-		bl = true;
+		bottomLeft = true;
 	}
 	while(solveCounter != 4)
 	{
 		rotateCounter = 0;
-		if((cube[4][1] != cube[3][1] || cube[1][4] != cube[1][3]) && (tl == false) && (tlLoop == false)) //top left middle
+		if((cube[4][1] != cube[3][1] || cube[1][4] != cube[1][3]) && (topLeft == false) && (topLeftLoop == false)) //top left middle
 		{
 			while(rotateCounter < 4)
 			{
@@ -1106,7 +1126,7 @@ void solveMiddleLayer()
 			{
 				rotateFaces("ddlDLDBdb");
 				solveCounter++;
-				tl = true;
+				topLeft = true;
 				trLoop = false;
 				brLoop = false;
 				blLoop = false;
@@ -1115,16 +1135,16 @@ void solveMiddleLayer()
 			{
 				rotateFaces("DBdbdlDL");
 				solveCounter++;
-				tl = true;
+				topLeft = true;
 				trLoop = false;
 				brLoop = false;
 				blLoop = false;
 			}
 			else
-				tlLoop = true;
+				topLeftLoop = true;
 		}
 
-		else if((cube[4][7] != cube[3][7] || cube[1][4] != cube[1][5]) && (tr == false) && (trLoop == false)) //top right middle
+		else if((cube[4][7] != cube[3][7] || cube[1][4] != cube[1][5]) && (topRight == false) && (trLoop == false)) //top right middle
 		{
 			while(rotateCounter < 4)
 			{
@@ -1139,8 +1159,8 @@ void solveMiddleLayer()
 			{
 				rotateFaces("ddbDBDRdr");
 				solveCounter++;
-				tr = true;
-				tlLoop = false;
+				topRight = true;
+				topLeftLoop = false;
 				brLoop = false;
 				blLoop = false;
 			}
@@ -1148,15 +1168,15 @@ void solveMiddleLayer()
 			{
 				rotateFaces("DRdrdbDB");
 				solveCounter++;
-				tr = true;
-				tlLoop = false;
+				topRight = true;
+				topLeftLoop = false;
 				brLoop = false;
 				blLoop = false;
 			}
 			else
 				trLoop = true;
 		}
-		else if((cube[4][7] != cube[5][7] || cube[7][4] != cube[7][5]) && (br == false) && (brLoop == false)) //bottom right middle
+		else if((cube[4][7] != cube[5][7] || cube[7][4] != cube[7][5]) && (bottomRight == false) && (brLoop == false)) //bottom right middle
 		{
 			while(rotateCounter < 4)
 			{
@@ -1171,8 +1191,8 @@ void solveMiddleLayer()
 			{
 				rotateFaces("ddrDRDFdf");
 				solveCounter++;
-				br = true;
-				tlLoop = false;
+				bottomRight = true;
+				topLeftLoop = false;
 				trLoop = false;
 				blLoop = false;
 			}
@@ -1180,8 +1200,8 @@ void solveMiddleLayer()
 			{
 				rotateFaces("DFdfdrDR");
 				solveCounter++;
-				br = true;
-				tlLoop = false;
+				bottomRight = true;
+				topLeftLoop = false;
 				trLoop = false;
 				blLoop = false;
 			}
@@ -1189,7 +1209,7 @@ void solveMiddleLayer()
 				brLoop = true;
 		}
 
-		else if((cube[4][1] != cube[5][1] || cube[7][4] != cube[7][3]) && (bl == false) && (blLoop == false))//bottom left middle
+		else if((cube[4][1] != cube[5][1] || cube[7][4] != cube[7][3]) && (bottomLeft == false) && (blLoop == false))//bottom left middle
 		{
 			while(rotateCounter < 4)
 			{
@@ -1204,8 +1224,8 @@ void solveMiddleLayer()
 			{
 				rotateFaces("ddfDFDLdl");
 				solveCounter++;
-				bl = true;
-				tlLoop = false;
+				bottomLeft = true;
+				topLeftLoop = false;
 				trLoop = false;
 				brLoop = false;
 			}
@@ -1213,8 +1233,8 @@ void solveMiddleLayer()
 			{
 				rotateFaces("DLdldfDF");
 				solveCounter++;
-				bl = true;
-				tlLoop = false;
+				bottomLeft = true;
+				topLeftLoop = false;
 				trLoop = false;
 				brLoop = false;
 			}
@@ -1231,15 +1251,15 @@ void solveMiddleLayer()
 		}
 		else
 		{
-			if(tl != true)
+			if(topLeft != true)
 				rotateFaces("lDLDBdb");
-			else if(tr != true)
+			else if(topRight != true)
 				rotateFaces("bDBDRdr");
-			else if(br != true)
+			else if(bottomRight != true)
 				rotateFaces("rDRDFdf");
-			else if(bl != true)
+			else if(bottomLeft != true)
 				rotateFaces("fDFDLdl");
-			tlLoop = false;
+			topLeftLoop = false;
 			trLoop = false;
 			brLoop = false;
 			blLoop = false;
@@ -1436,7 +1456,7 @@ void solveBottomMiddle()
 	}
 }
 
-//This function puts all of the corners in the correct spot. It assumes all of the previous functions worked correctly.
+//This function puts all of the corners in the correct spot. It assumes all of the previous functions worked correctopLefty.
 void positionBottomCorners()
 {
 	char side1[] = {cube[2][3], cube[2][5], cube[6][5], cube[6][3]};
@@ -1444,13 +1464,13 @@ void positionBottomCorners()
 	char side3[] = {cube[3][3], cube[3][5], cube[5][5], cube[5][3]};
 	char pattern[] = {cube[4][1], cube[1][4], cube[4][7], cube[7][4], cube[4][1]};
 	char bottomColor = cube[4][4], oneSide = pattern[0], twoSide = pattern[1];
-	bool tl = false, tr = false, br = false, bl = false;
+	bool topLeft = false, topRight = false, bottomRight = false, bottomLeft = false;
 	solveCounter = 0;
 	if( (side1[0] == oneSide || side1[0] == twoSide || side1[0] == bottomColor) &&
 		(side2[0] == twoSide || side2[0] == bottomColor || side2[0] == oneSide) &&
 		(side3[0] == bottomColor || side3[0] == oneSide || side3[0] == twoSide) )
 	{
-		tl = true;
+		topLeft = true;
 		solveCounter++;
 	}
 	oneSide = pattern[1];
@@ -1459,7 +1479,7 @@ void positionBottomCorners()
 		(side2[1] == twoSide || side2[1] == bottomColor || side2[1] == oneSide) &&
 		(side3[1] == bottomColor || side3[1] == oneSide || side3[1] == twoSide) )
 	{
-		tr = true;
+		topRight = true;
 		solveCounter++;
 	}
 	oneSide = pattern[2];
@@ -1468,7 +1488,7 @@ void positionBottomCorners()
 		(side2[2] == twoSide || side2[2] == bottomColor || side2[2] == oneSide) &&
 		(side3[2] == bottomColor || side3[2] == oneSide || side3[2] == twoSide) )
 	{
-		br = true;
+		bottomRight = true;
 		solveCounter++;
 	}
 	oneSide = pattern[3];
@@ -1477,16 +1497,16 @@ void positionBottomCorners()
 		(side2[3] == twoSide || side2[3] == bottomColor || side2[3] == oneSide) &&
 		(side3[3] == bottomColor || side3[3] == oneSide || side3[3] == twoSide) )
 	{
-		bl = true;
+		bottomLeft = true;
 		solveCounter++;
 	}
 	if(solveCounter == 0)
 	{
 		rotateFaces("URulUruL");
-		tl = false;
-		tr = false;
-		br = false;
-		bl = false;
+		topLeft = false;
+		topRight = false;
+		bottomRight = false;
+		bottomLeft = false;
 		side1[0] = cube[2][3]; //update sides because of shifting faces, this is out of date then
 		side1[1] = cube[2][5];
 		side1[2] = cube[6][5];
@@ -1505,7 +1525,7 @@ void positionBottomCorners()
 			(side2[0] == twoSide || side2[0] == bottomColor || side2[0] == oneSide) &&
 			(side3[0] == bottomColor || side3[0] == oneSide || side3[0] == twoSide) )
 		{
-			tl = true;
+			topLeft = true;
 			solveCounter++;
 		}
 		oneSide = pattern[1];
@@ -1514,7 +1534,7 @@ void positionBottomCorners()
 			(side2[1] == twoSide || side2[1] == bottomColor || side2[1] == oneSide) &&
 			(side3[1] == bottomColor || side3[1] == oneSide || side3[1] == twoSide) )
 		{
-			tr = true;
+			topRight = true;
 			solveCounter++;
 		}
 		oneSide = pattern[2];
@@ -1523,7 +1543,7 @@ void positionBottomCorners()
 			(side2[2] == twoSide || side2[2] == bottomColor || side2[2] == oneSide) &&
 			(side3[2] == bottomColor || side3[2] == oneSide || side3[2] == twoSide) )
 		{
-			br = true;
+			bottomRight = true;
 			solveCounter++;
 		}
 		oneSide = pattern[3];
@@ -1532,25 +1552,25 @@ void positionBottomCorners()
 			(side2[3] == twoSide || side2[3] == bottomColor || side2[3] == oneSide) &&
 			(side3[3] == bottomColor || side3[3] == oneSide || side3[3] == twoSide) )
 		{
-			bl = true;
+			bottomLeft = true;
 			solveCounter++;
 		}
 	}
 	while(solveCounter != 4)
 	{
-		if(tl)
+		if(topLeft)
 			rotateFaces("ULurUluR");
-		else if(tr)
+		else if(topRight)
 			rotateFaces("UBufUbuF");
-		else if(br)
+		else if(bottomRight)
 			rotateFaces("URulUruL");
-		else if(bl)
+		else if(bottomLeft)
 			rotateFaces("UFubUfuB");
 		solveCounter = 0;
-		tl = false;
-		tr = false;
-		br = false;
-		bl = false;
+		topLeft = false;
+		topRight = false;
+		bottomRight = false;
+		bottomLeft = false;
 		side1[0] = cube[2][3]; //update sides because of shifting faces, this is out of date then
 		side1[1] = cube[2][5];
 		side1[2] = cube[6][5];
@@ -1569,7 +1589,7 @@ void positionBottomCorners()
 			(side2[0] == twoSide || side2[0] == bottomColor || side2[0] == oneSide) &&
 			(side3[0] == bottomColor || side3[0] == oneSide || side3[0] == twoSide) )
 		{
-			tl = true;
+			topLeft = true;
 			solveCounter++;
 		}
 		oneSide = pattern[1];
@@ -1578,7 +1598,7 @@ void positionBottomCorners()
 			(side2[1] == twoSide || side2[1] == bottomColor || side2[1] == oneSide) &&
 			(side3[1] == bottomColor || side3[1] == oneSide || side3[1] == twoSide) )
 		{
-			tr = true;
+			topRight = true;
 			solveCounter++;
 		}
 		oneSide = pattern[2];
@@ -1587,7 +1607,7 @@ void positionBottomCorners()
 			(side2[2] == twoSide || side2[2] == bottomColor || side2[2] == oneSide) &&
 			(side3[2] == bottomColor || side3[2] == oneSide || side3[2] == twoSide) )
 		{
-			br = true;
+			bottomRight = true;
 			solveCounter++;
 		}
 		oneSide = pattern[3];
@@ -1596,7 +1616,7 @@ void positionBottomCorners()
 			(side2[3] == twoSide || side2[3] == bottomColor || side2[3] == oneSide) &&
 			(side3[3] == bottomColor || side3[3] == oneSide || side3[3] == twoSide) )
 		{
-			bl = true;
+			bottomLeft = true;
 			solveCounter++;
 		}
 	}
@@ -1605,13 +1625,13 @@ void positionBottomCorners()
 //This function solves all of the bottom corners to the correct orientations
 void solveBottomCorners()
 {
-	for(int i = 0; i < 4; i++)
+	for(int index = 0; index < 4; index++)
 	{
 		while(cube[5][5] != cube[4][4])
 		{
 			rotateFaces("rdRD");
 		}
-		if(i != 3)
+		if(index != 3)
 			rotateFaces("u");
 	}
 	while(cube[6][4] != cube[7][4])
@@ -1644,10 +1664,10 @@ void setMasterFromCube()
 //This function updates the shortest solution from the current solution.
 void updateShortest()
 {
-	for(int i = 0; i < SLN_SIZE; i++)
-		shortestSolution[i] = "x";
-	for(int i = 0; i < SLN_SIZE; i++)
-		shortestSolution[i] = solution[i];
+	for(int index = 0; index < SOLUTION_SIZE; index++)
+		shortestSolution[index] = "x";
+	for(int index = 0; index < SOLUTION_SIZE; index++)
+		shortestSolution[index] = solution[index];
 }
 
 //This function will take a solution and validate it using the step by step string created as the solution was created.
@@ -1658,7 +1678,7 @@ bool validateSolution()
 	setCubeFromMaster();
 	rotateFaces(solution[solutionIndex]);
 	solutionIndex+=2;
-	for(solutionIndex; solutionIndex < SLN_SIZE; solutionIndex++)
+	for(solutionIndex; solutionIndex < SOLUTION_SIZE; solutionIndex++)
 		rotateFaces(solution[solutionIndex]);
 	validation = false;
 	if(checkCube(3))
@@ -1668,16 +1688,16 @@ bool validateSolution()
 }
 
 //This function will push the entire solution back a slot. This is used in conjunction with optimize to get a shorter solution.
-void shiftSlnBack()
+void shiftSolutionBack()
 {
 	string temp;
-	for(int i = 0; i < SLN_SIZE-1; i++)
+	for(int index = 0; index < SOLUTION_SIZE-1; index++)
 	{
-		if(solution[i] == "x")
+		if(solution[index] == "x")
 		{
-			temp = solution[i];
-			solution[i] = solution[i+1];
-			solution[i+1] = temp;
+			temp = solution[index];
+			solution[index] = solution[index+1];
+			solution[index+1] = temp;
 		}
 	}
 }
@@ -1690,171 +1710,171 @@ void optimize()
 	int prevCost = 1;
 	char tempChar;
 	string tempString;
-	for(int i = 0; i < SLN_SIZE; i++)
-		if(solution[i] != "x")
+	for(int index = 0; index < SOLUTION_SIZE; index++)
+		if(solution[index] != "x")
 			cost++;
 	while(cost != prevCost) //get rid of the 4 rotations around.  this is does nothing overall, so get rid of it.
 	{
 		prevCost = cost;
 		cost = 0;
-		for(int i = 0; i < SLN_SIZE - 3; i++)
+		for(int index = 0; index < SOLUTION_SIZE - 3; index++)
 		{
-			if((solution[i] == solution[i+1]) && (solution[i] == solution[i+2]) && (solution[i] == solution[i+3]))
+			if((solution[index] == solution[index+1]) && (solution[index] == solution[index+2]) && (solution[index] == solution[index+3]))
 			{
-				solution[i] = "x";
-				solution[i+1] = "x";
-				solution[i+2] = "x";
-				solution[i+3] = "x";
+				solution[index] = "x";
+				solution[index+1] = "x";
+				solution[index+2] = "x";
+				solution[index+3] = "x";
 			}
 		}
-		for(int i = 0; i < SLN_SIZE; i++)
-			if(solution[i] != "x")
+		for(int index = 0; index < SOLUTION_SIZE; index++)
+			if(solution[index] != "x")
 				cost++;
 	}
-	shiftSlnBack();
+	shiftSolutionBack();
 	prevCost = 1;
 	while(cost != prevCost) //change the 3 rotations around one direction to just 1 in the other direction, since it's equivalent.
 	{
 		prevCost = cost;
 		cost = 0;
-		for(int i = 0; i < SLN_SIZE - 2; i++)
+		for(int index = 0; index < SOLUTION_SIZE - 2; index++)
 		{
-			if((solution[i] == solution[i+1]) && (solution[i] == solution[i+2]))
+			if((solution[index] == solution[index+1]) && (solution[index] == solution[index+2]))
 			{
-				tempString = solution[i];
+				tempString = solution[index];
 				tempChar = tempString[0];
 				switch(tempChar)
 				{
-				case 'U': solution[i] = "u";  break;
-				case 'L': solution[i] = "l";  break;
-				case 'F': solution[i] = "f";  break;
-				case 'R': solution[i] = "r";  break;
-				case 'B': solution[i] = "b";  break;
-				case 'D': solution[i] = "d";  break;
-				case 'u': solution[i] = "U";  break;
-				case 'l': solution[i] = "L";  break;
-				case 'f': solution[i] = "F";  break;
-				case 'r': solution[i] = "R";  break;
-				case 'b': solution[i] = "B";  break;
-				case 'd': solution[i] = "D";  break;
+				case 'U': solution[index] = "u";  break;
+				case 'L': solution[index] = "l";  break;
+				case 'F': solution[index] = "f";  break;
+				case 'R': solution[index] = "r";  break;
+				case 'B': solution[index] = "b";  break;
+				case 'D': solution[index] = "d";  break;
+				case 'u': solution[index] = "U";  break;
+				case 'l': solution[index] = "L";  break;
+				case 'f': solution[index] = "F";  break;
+				case 'r': solution[index] = "R";  break;
+				case 'b': solution[index] = "B";  break;
+				case 'd': solution[index] = "D";  break;
 				}
-				solution[i+1] = "x";
-				solution[i+2] = "x";
+				solution[index+1] = "x";
+				solution[index+2] = "x";
 			}
 		}
-		for(int i = 0; i < SLN_SIZE; i++)
-			if(solution[i] != "x")
+		for(int index = 0; index < SOLUTION_SIZE; index++)
+			if(solution[index] != "x")
 				cost++;
 	}
-	shiftSlnBack();
+	shiftSolutionBack();
 	prevCost = 1;
 	while(cost != prevCost) //change the movement in 1 direction and the equivalent movement in the other direction to x's.
 	{
 		prevCost = cost;
 		cost = 0;
-		for(int i = 0; i < SLN_SIZE - 1; i++)
+		for(int index = 0; index < SOLUTION_SIZE - 1; index++)
 		{
-			tempString = solution[i];
+			tempString = solution[index];
 			tempChar = tempString[0];
 			switch(tempChar)
 			{
 			case 'U': 
-				if(solution[i+1] == "u")
+				if(solution[index+1] == "u")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'L': 
-				if(solution[i+1] == "l")
+				if(solution[index+1] == "l")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'F': 
-				if(solution[i+1] == "f")
+				if(solution[index+1] == "f")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'R': 
-				if(solution[i+1] == "r")
+				if(solution[index+1] == "r")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'B': 
-				if(solution[i+1] == "b")
+				if(solution[index+1] == "b")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'D': 
-				if(solution[i+1] == "d")
+				if(solution[index+1] == "d")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'u': 
-				if(solution[i+1] == "U")
+				if(solution[index+1] == "U")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'l': 
-				if(solution[i+1] == "L")
+				if(solution[index+1] == "L")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'f': 
-				if(solution[i+1] == "F")
+				if(solution[index+1] == "F")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'r': 
-				if(solution[i+1] == "R")
+				if(solution[index+1] == "R")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'b': 
-				if(solution[i+1] == "B")
+				if(solution[index+1] == "B")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			case 'd': 
-				if(solution[i+1] == "D")
+				if(solution[index+1] == "D")
 				{
-					solution[i] = "x";
-					solution[i+1] = "x";
+					solution[index] = "x";
+					solution[index+1] = "x";
 				}
 				break;
 			}
 		}
-		for(int i = 0; i < SLN_SIZE; i++)
-			if(solution[i] != "x")
+		for(int index = 0; index < SOLUTION_SIZE; index++)
+			if(solution[index] != "x")
 				cost++;
 	}
-	shiftSlnBack();
-	for(int i = 0; i < SLN_SIZE; i++)
+	shiftSolutionBack();
+	for(int index = 0; index < SOLUTION_SIZE; index++)
 	{
-		if(solution[i] == "x")
+		if(solution[index] == "x")
 		{
-			solutionIndex = i+1;
-			i = SLN_SIZE;
+			solutionIndex = index+1;
+			index = SOLUTION_SIZE;
 		}
 	}
 }
@@ -1866,16 +1886,16 @@ void solve()
 	long long startTime = GetTickCount();
 	int shortestMoveCount = 65535;
 	string shortestColor = "k";
-	for(int i = 0; i < 6; i++)
+	for(int index = 0; index < 6; index++)
 	{
 		setCubeFromMaster();
-		for(int j = 0; j < SLN_SIZE; j++)
+		for(int j = 0; j < SOLUTION_SIZE; j++)
 		{
 			solution[j] = "x";
 			preoptimization[j] = "x";
 		}
 		solutionIndex = 0;
-		switch(i)
+		switch(index)
 		{
 		case 0: rotateFaces("0");  break;
 		case 1: rotateFaces("1");  break;
@@ -1911,12 +1931,12 @@ void solve()
 				solveBottomCorners();
 			}
 		} //end if to solve
-		for(int i = 0; i < SLN_SIZE; i++)
-			preoptimization[i] = solution[i];
+		for(int index = 0; index < SOLUTION_SIZE; index++)
+			preoptimization[index] = solution[index];
 		optimize();
 		int cost = 0;
-		for(int i = 0; i < SLN_SIZE; i++)
-			if(solution[i] != "x")
+		for(int index = 0; index < SOLUTION_SIZE; index++)
+			if(solution[index] != "x")
 				cost++;
 		printCube();
 		if(validateSolution())
@@ -1980,7 +2000,7 @@ int main()
 	string input = "k";
 	while(input.compare("quit") != 0)
 	{
-		for(solutionIndex = 0; solutionIndex < SLN_SIZE; solutionIndex++)
+		for(solutionIndex = 0; solutionIndex < SOLUTION_SIZE; solutionIndex++)
 			solution[solutionIndex] = "x";
 		solutionIndex = 0;
 		printCube();
